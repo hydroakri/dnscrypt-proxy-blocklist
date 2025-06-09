@@ -42,12 +42,17 @@ jobs:
             --allowlist domains-allowlist.txt \
             --output-file blocklist.txt
 
+      - name: Prepare publish directory
+        run: |
+          mkdir -p publish
+          cp merged-blocklist.txt publish/
+
       - name: Git push assets to release branch
         run: |
-          cd publish || exit 1
+          cd publish
           git init
           git config --local user.name "github-actions[bot]"
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.email "${{ github.actor }}@users.noreply.github.com"
           git checkout -b release
           git add .
           git commit -m "${{ env.RELEASE_NAME }}"
@@ -56,7 +61,7 @@ jobs:
 
       - name: Purge jsDelivr CDN
         run: |
-          cd publish || exit 1
-          for file in $(ls); do
+          cd publish
+          for file in *; do
             curl -i "https://purge.jsdelivr.net/gh/${{ github.repository }}@release/${file}"
           done
