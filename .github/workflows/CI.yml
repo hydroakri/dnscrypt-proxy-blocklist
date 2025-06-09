@@ -38,17 +38,17 @@ steps:
   - name: Generate merged blocklist
     run: |
       # Ensure domains-blocklist.conf, allowlist and time-restricted files are in the repo root
-      python dnscrypt-proxy/utils/generate-domains-blocklist.py \
-        --input domains-blocklist.conf \
+      python dnscrypt-proxy/utils/generate-domains-blocklist/generate-domains-blocklist.py \
+        --config domains-blocklist.conf \
         --time-restricted domains-time-restricted.txt \
         --allowlist domains-allowlist.txt \
-        --output merged-blocklist.txt
+        --output-file blocklist.txt
 
   - name: Commit and push changes
     uses: EndBug/add-and-commit@v9
     with:
       message: "chore: update merged blocklist"
-      add: "merged-blocklist.txt"
+      add: "blocklist.txt"
       author_name: "github-actions[bot]"
       author_email: "github-actions[bot]@users.noreply.github.com"
 ```
