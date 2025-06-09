@@ -1,0 +1,54 @@
+# This GitHub Actions workflow fetches and merges blocklists on a schedule
+
+# using the `generate-domains-blocklist.py` from the official dnscrypt-proxy repository.
+
+name: Update Blocklist
+
+on:
+schedule:
+\# Runs at 0:00 UTC every day (8:00 AM SGT)
+\- cron: '0 0 \* \* \*'
+workflow\_dispatch: {}
+
+jobs:
+build:
+runs-on: ubuntu-latest
+
+```
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+
+  - name: Checkout dnscrypt-proxy tools
+    uses: actions/checkout@v4
+    with:
+      repository: 'DNSCrypt/dnscrypt-proxy'
+      path: 'dnscrypt-proxy'
+
+  - name: Set up Python
+    uses: actions/setup-python@v4
+    with:
+      python-version: '3.11'
+
+  - name: Install dependencies
+    run: |
+      python -m pip install --upgrade pip
+      # If your script requires extra libraries, install them here
+
+  - name: Generate merged blocklist
+    run: |
+      # Ensure domains-blocklist.conf, allowlist and time-restricted files are in the repo root
+      python dnscrypt-proxy/utils/generate-domains-blocklist.py \
+        --input domains-blocklist.conf \
+        --time-restricted domains-time-restricted.txt \
+        --allowlist domains-allowlist.txt \
+        --output merged-blocklist.txt
+
+  - name: Commit and push changes
+    uses: EndBug/add-and-commit@v9
+    with:
+      message: "chore: update merged blocklist"
+      add: "merged-blocklist.txt"
+      author_name: "github-actions[bot]"
+      author_email: "github-actions[bot]@users.noreply.github.com"
+```
