@@ -45,7 +45,7 @@ jobs:
       - name: Prepare publish directory
         run: |
           mkdir -p publish
-          cp merged-blocklist.txt publish/
+          cp blocklist.txt publish/
 
       - name: Git push assets to release branch
         run: |
