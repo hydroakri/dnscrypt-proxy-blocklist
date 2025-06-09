@@ -12,8 +12,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
+      - name: Set variables
+        run: |
+          echo "RELEASE_NAME=Released on $(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+          echo "TAG_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+        shell: bash
+        
       - name: Checkout repository
         uses: actions/checkout@v4
 
