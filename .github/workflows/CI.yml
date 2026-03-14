@@ -47,10 +47,68 @@ jobs:
             --allowlist domains-allowlist.txt \
             --output-file blocklist.txt
 
+      - name: Convert blocklist to sing-box JSON
+        run: |
+          cat << 'EOF' > convert_to_srs.py
+          import json
+
+          domains = set()
+          domain_suffixes = set()
+
+          with open("blocklist.txt", "r", encoding="utf-8") as f:
+              for line in f:
+                  line = line.strip()
+                  # 忽略空行和注释
+                  if not line or line.startswith("#"):
+                      continue
+                  
+                  # 移除 dnscrypt-proxy 可能存在的 @ 时间控制后缀 (如 domain @time)
+                  domain = line.split("@")[0].strip()
+                  
+                  # 根据 dnscrypt-proxy 格式匹配到 sing-box 规则
+                  if domain.startswith("*."):
+                      domain_suffixes.add(domain[2:])
+                  elif domain.startswith("*"):
+                      domain_suffixes.add(domain[1:])
+                  elif domain.startswith("="):
+                      # =domain 表示精准匹配
+                      domains.add(domain[1:])
+                  else:
+                      # dnscrypt 里的普通域名默认也拦截所有子域名，对应 domain_suffix
+                      domain_suffixes.add(domain)
+
+          rules =[]
+          if domains:
+              rules.append({"domain": sorted(list(domains))})
+          if domain_suffixes:
+              rules.append({"domain_suffix": sorted(list(domain_suffixes))})
+
+          # version: 1 适配最广，若要求体积进一步优化(需 sing-box 1.10.0+ 客户端)，可改为 version: 2
+          srs_json = {
+              "version": 1,
+              "rules": rules
+          }
+
+          with open("blocklist.json", "w", encoding="utf-8") as f:
+              json.dump(srs_json, f, indent=2)
+          EOF
+          python convert_to_srs.py
+
+      - name: Install sing-box CLI
+        run: |
+          # 使用官方脚本自动拉取并安装最新版 sing-box 的命令行工具
+          bash <(curl -fsSL https://sing-box.app/install.sh)
+
+      - name: Compile to sing-box SRS format
+        run: |
+          sing-box rule-set compile --output blocklist.srs blocklist.json
+
       - name: Prepare publish directory
         run: |
           mkdir -p publish
-          cp blocklist.txt publish
+          cp blocklist.txt publish/
+          # 将编译好的 srs 文件一并加入 publish 目录
+          cp blocklist.srs publish/
 
       - name: Release and upload assets
         uses: svenstaro/upload-release-action@v2
