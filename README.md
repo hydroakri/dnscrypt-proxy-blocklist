@@ -2,6 +2,44 @@
 https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist.txt  
 https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.txt  
 
+Each run publishes two variants, each in four formats. A release/CDN push
+only happens when the generated domain set actually changed since the last
+run (`state.json` tracks a hash per variant; nothing changed → no new
+release, no CDN purge).
+
+## Variants
+
+- **big** (`blocklist.*`) — full list, all sources below under "DNS domains".
+- **mini** (`blocklist-mini.*`) — smaller variant for setups that don't need
+  the full list. Sources: [HaGeZi Pro Mini](https://github.com/hagezi/dns-blocklists),
+  [OISD Small](https://oisd.nl/), [HaGeZi Threat Intelligence Feeds (mini)](https://github.com/hagezi/dns-blocklists),
+  [Online Malicious URL Blocklist](https://github.com/curbengh/urlhaus-filter),
+  and this project's own [ddg-blocklist](https://github.com/hydroakri/ddg-blocklist)
+  tracker list. Target size is under 10MB, measured per CI run rather than
+  hard-capped — TIF mini alone is ~170k domains, so actual size depends on
+  upstream list churn.
+
+## Formats
+
+- `.txt` — dnscrypt-proxy plain domain list (the original format).
+- `.json` / `.srs` — [sing-box](https://sing-box.sagernet.org/) rule-set
+  (JSON source + compiled binary).
+- `.rpz` — [Unbound](https://unbound.docs.nlnetlabs.nl/) Response Policy
+  Zone. Point Unbound at the released file with something like:
+  ```
+  rpz:
+    name: "dnscrypt-proxy-blocklist"
+    zonefile: "/path/to/blocklist.rpz"
+    url: "https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.rpz"
+  ```
+  The SOA refresh interval in the file controls how often Unbound re-polls
+  the `url:` source.
+
+**Limitation:** entries in `domains-time-restricted.txt` (the `@tag`
+time-window syntax) only work in the `.txt` format, which dnscrypt-proxy
+itself interprets. The `.json`/`.srs`/`.rpz` formats have no time-window
+concept, so those entries are blocked unconditionally in those formats.
+
 ## Some details
 ### DNS domains
 [CHN: AdRules DNS List](https://github.com/Cats-Team/AdRules)  
@@ -11,6 +49,7 @@ https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist
 [OISD Blocklist Big](https://oisd.nl/)  
 [Peter Lowe's Blocklist](https://pgl.yoyo.org/adservers/)  
 [Dan Pollock's List](https://someonewhocares.org/hosts/)  
+[ddg-blocklist](https://github.com/hydroakri/ddg-blocklist) (DuckDuckGo tracker blocklist, own project)  
 ### URL rules for ABP/uBO
 [uBlock filters](https://github.com/uBlockOrigin/uAssets)  
 [EasyList & EasyPrivacy & EasyList Cookie & Fanboy's Annoyance List](https://easylist.to/)  
