@@ -1,1 +1,6 @@
-domains-allowlist.txt
+# Allowlist for dnscrypt-proxy-blocklist
+# Domains that should NOT be blocked even if they appear in blocklists
+# Format: one domain per line, supports wildcards and regex
+
+www.supportxmr.com
+pool.supportxmr.com
