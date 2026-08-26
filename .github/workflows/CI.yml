@@ -1,5 +1,10 @@
 # This GitHub Actions workflow fetches and merges blocklists on a schedule
 # using the `generate-domains-blocklist.py` from the official dnscrypt-proxy repository.
+#
+# It builds two variants (big + mini) in four formats each (dnscrypt-proxy
+# plain text, sing-box JSON/SRS, Unbound RPZ), but only cuts a new release /
+# force-pushes the `release` branch / purges the CDN / commits state.json
+# when the generated domain set actually changed since the last run.
 
 name: Update Blocklist
 
@@ -7,7 +12,15 @@ on:
   schedule:
     # Runs at 0:00 UTC every day (8:00 AM SGT)
     - cron: '0 0 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force a release even if nothing changed'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -17,8 +30,9 @@ jobs:
         run: |
           echo "RELEASE_NAME=Released on $(date +%Y%m%d%H%M)" >> $GITHUB_ENV
           echo "TAG_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+          echo "SERIAL=$(date +%s)" >> $GITHUB_ENV
         shell: bash
-        
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -38,7 +52,7 @@ jobs:
           python -m pip install --upgrade pip
           # If your script requires extra libraries, install them here
 
-      - name: Generate merged blocklist
+      - name: Generate merged blocklist (big)
         run: |
           # Ensure domains-blocklist.conf, allowlist and time-restricted files are in the repo root
           python dnscrypt-proxy/utils/generate-domains-blocklist/generate-domains-blocklist.py \
@@ -47,70 +61,165 @@ jobs:
             --allowlist domains-allowlist.txt \
             --output-file blocklist.txt
 
-      - name: Convert blocklist to sing-box JSON
+      - name: Generate merged blocklist (mini)
+        run: |
+          python dnscrypt-proxy/utils/generate-domains-blocklist/generate-domains-blocklist.py \
+            --config domains-blocklist-mini.conf \
+            --time-restricted domains-time-restricted.txt \
+            --allowlist domains-allowlist.txt \
+            --output-file blocklist-mini.txt
+
+      - name: Report mini list size
+        run: |
+          echo "blocklist-mini.txt size:"
+          du -h blocklist-mini.txt
+
+      - name: Detect changes
+        id: diff
+        run: |
+          NEW_BIG=$(sha256sum blocklist.txt | cut -d' ' -f1)
+          NEW_MINI=$(sha256sum blocklist-mini.txt | cut -d' ' -f1)
+          OLD_BIG=$(jq -r '.big // ""' state.json)
+          OLD_MINI=$(jq -r '.mini // ""' state.json)
+
+          echo "new_big=$NEW_BIG" >> "$GITHUB_OUTPUT"
+          echo "new_mini=$NEW_MINI" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ github.event.inputs.force }}" = "true" ] || [ "$NEW_BIG" != "$OLD_BIG" ] || [ "$NEW_MINI" != "$OLD_MINI" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Convert blocklists to sing-box JSON
+        if: steps.diff.outputs.changed == 'true'
         run: |
           cat << 'EOF' > convert_to_srs.py
           import json
+          import sys
+
+          input_file = sys.argv[1]
+          output_file = sys.argv[2]
 
           domains = set()
           domain_suffixes = set()
 
-          with open("blocklist.txt", "r", encoding="utf-8") as f:
+          with open(input_file, "r", encoding="utf-8") as f:
               for line in f:
                   line = line.strip()
-                  # 忽略空行和注释
                   if not line or line.startswith("#"):
                       continue
-                  
-                  # 移除 dnscrypt-proxy 可能存在的 @ 时间控制后缀 (如 domain @time)
+
+                  # strip dnscrypt-proxy's optional time-restriction suffix (e.g. "domain @tag")
                   domain = line.split("@")[0].strip()
-                  
-                  # 根据 dnscrypt-proxy 格式匹配到 sing-box 规则
+
+                  # dnscrypt-proxy prefixes: "*." / "*" = domain + subdomains, "=" = exact match only
                   if domain.startswith("*."):
                       domain_suffixes.add(domain[2:])
                   elif domain.startswith("*"):
                       domain_suffixes.add(domain[1:])
                   elif domain.startswith("="):
-                      # =domain 表示精准匹配
                       domains.add(domain[1:])
                   else:
-                      # dnscrypt 里的普通域名默认也拦截所有子域名，对应 domain_suffix
                       domain_suffixes.add(domain)
 
-          rules =[]
+          rules = []
           if domains:
-              rules.append({"domain": sorted(list(domains))})
+              rules.append({"domain": sorted(domains)})
           if domain_suffixes:
-              rules.append({"domain_suffix": sorted(list(domain_suffixes))})
+              rules.append({"domain_suffix": sorted(domain_suffixes)})
 
-          # version: 1 适配最广，若要求体积进一步优化(需 sing-box 1.10.0+ 客户端)，可改为 version: 2
+          # version: 1 is broadest client compat; version: 2 is smaller but needs sing-box 1.10.0+
           srs_json = {
               "version": 1,
               "rules": rules
           }
 
-          with open("blocklist.json", "w", encoding="utf-8") as f:
+          with open(output_file, "w", encoding="utf-8") as f:
               json.dump(srs_json, f, indent=2)
           EOF
-          python convert_to_srs.py
+          python convert_to_srs.py blocklist.txt blocklist.json
+          python convert_to_srs.py blocklist-mini.txt blocklist-mini.json
+
+      - name: Convert blocklists to Unbound RPZ
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          cat << 'EOF' > convert_to_rpz.py
+          import sys
+
+          input_file = sys.argv[1]
+          output_file = sys.argv[2]
+          serial = sys.argv[3]
+
+          exact_domains = set()
+          suffix_domains = set()
+
+          with open(input_file, "r", encoding="utf-8") as f:
+              for line in f:
+                  line = line.strip()
+                  if not line or line.startswith("#"):
+                      continue
+
+                  # strip dnscrypt-proxy's optional time-restriction suffix; RPZ has no time-window
+                  # mechanism so these are blocked unconditionally, same as the sing-box conversion.
+                  domain = line.split("@")[0].strip()
+
+                  if domain.startswith("*."):
+                      suffix_domains.add(domain[2:])
+                  elif domain.startswith("*"):
+                      suffix_domains.add(domain[1:])
+                  elif domain.startswith("="):
+                      exact_domains.add(domain[1:])
+                  else:
+                      suffix_domains.add(domain)
+
+          lines = [
+              "$TTL 60",
+              "@ IN SOA localhost. admin.localhost. (",
+              f"    {serial} ; serial",
+              "    3600      ; refresh",
+              "    600       ; retry",
+              "    86400     ; expire",
+              "    60        ; minimum",
+              ")",
+              "@ IN NS localhost.",
+              "",
+          ]
+
+          for domain in sorted(exact_domains):
+              lines.append(f"{domain} CNAME .")
+
+          for domain in sorted(suffix_domains):
+              lines.append(f"{domain} CNAME .")
+              lines.append(f"*.{domain} CNAME .")
+
+          with open(output_file, "w", encoding="utf-8") as f:
+              f.write("\n".join(lines) + "\n")
+          EOF
+          python convert_to_rpz.py blocklist.txt blocklist.rpz "$SERIAL"
+          python convert_to_rpz.py blocklist-mini.txt blocklist-mini.rpz "$SERIAL"
 
       - name: Install sing-box CLI
+        if: steps.diff.outputs.changed == 'true'
         run: |
           # 使用官方脚本自动拉取并安装最新版 sing-box 的命令行工具
           bash <(curl -fsSL https://sing-box.app/install.sh)
 
       - name: Compile to sing-box SRS format
+        if: steps.diff.outputs.changed == 'true'
         run: |
           sing-box rule-set compile --output blocklist.srs blocklist.json
+          sing-box rule-set compile --output blocklist-mini.srs blocklist-mini.json
 
       - name: Prepare publish directory
+        if: steps.diff.outputs.changed == 'true'
         run: |
           mkdir -p publish
-          cp blocklist.txt publish/
-          # 将编译好的 srs 文件一并加入 publish 目录
-          cp blocklist.srs publish/
+          cp blocklist.txt blocklist.json blocklist.srs blocklist.rpz publish/
+          cp blocklist-mini.txt blocklist-mini.json blocklist-mini.srs blocklist-mini.rpz publish/
 
       - name: Release and upload assets
+        if: steps.diff.outputs.changed == 'true'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -120,6 +229,7 @@ jobs:
           file: ./publish/*
 
       - name: Git push assets to release branch
+        if: steps.diff.outputs.changed == 'true'
         run: |
           cd publish
           git init
@@ -132,8 +242,19 @@ jobs:
           git push -f -u origin release
 
       - name: Purge jsDelivr CDN
+        if: steps.diff.outputs.changed == 'true'
         run: |
           cd publish
           for file in *; do
             curl -i "https://purge.jsdelivr.net/gh/${{ github.repository }}@release/${file}"
           done
+
+      - name: Commit updated state.json
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          echo "{\"big\": \"${{ steps.diff.outputs.new_big }}\", \"mini\": \"${{ steps.diff.outputs.new_mini }}\"}" > state.json
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          git commit -m "Update state.json (${{ env.TAG_NAME }})" || echo "Nothing to commit"
+          git push
