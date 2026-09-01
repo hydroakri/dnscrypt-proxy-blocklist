@@ -1,6 +1,7 @@
-# This is dnscrypt-proxy blocklist for personal use 
+# This is dnscrypt-proxy blocklist for personal use
+
 https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist.txt  
-https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.txt  
+https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.txt
 
 Each run publishes two variants, each in four formats. A release/CDN push
 only happens when the generated domain set actually changed since the last
@@ -14,7 +15,6 @@ release, no CDN purge).
   the full list. Sources: [HaGeZi Pro Mini](https://github.com/hagezi/dns-blocklists),
   [OISD Small](https://oisd.nl/), [HaGeZi Threat Intelligence Feeds (mini)](https://github.com/hagezi/dns-blocklists),
   [Online Malicious URL Blocklist](https://github.com/curbengh/urlhaus-filter),
-  and this project's own [ddg-blocklist](https://github.com/hydroakri/ddg-blocklist)
   tracker list. Target size is under 10MB, measured per CI run rather than
   hard-capped — TIF mini alone is ~170k domains, so actual size depends on
   upstream list churn.
@@ -41,23 +41,42 @@ itself interprets. The `.json`/`.srs`/`.rpz` formats have no time-window
 concept, so those entries are blocked unconditionally in those formats.
 
 ## Some details
+
+Lists are merged with the [`generate-domains-blocklist.py`](https://github.com/DNSCrypt/dnscrypt-proxy/wiki/Combining-Blocklists)
+script from the official dnscrypt-proxy repo, which converts common
+third-party list formats (hosts files, wildcard domain lists, etc.) into
+dnscrypt-proxy's format, then dedupes and merges overlapping entries.
+
 ### DNS domains
+
 [CHN: AdRules DNS List](https://github.com/Cats-Team/AdRules)  
 [CHN: anti-AD](https://github.com/privacy-protection-tools/anti-AD)  
+[CHN: 217heidai/adblockfilters](https://github.com/217heidai/adblockfilters) —
+we only take its merged Chinese-domain hosts output (`adblockhosts.txt` for
+big, `adblockhostslite.txt` for mini), not the full project. That upstream
+project itself aggregates ~20 Chinese-focused sources (AdGuard Base/Chinese/
+Mobile Ads/DNS filters, EasyList/EasyList China/EasyPrivacy, AdRules DNS
+List, OISD Basic, AWAvenue Ads Rule, StevenBlack hosts, Dan Pollock's hosts,
+and others), dedupes them, and prunes domains that no longer resolve. It
+refreshes every 8 hours upstream.  
 [Online Malicious URL Blocklist](https://github.com/curbengh/urlhaus-filter)  
 [HaGeZi's Pro Blocklist & Threat Intelligence Feeds](https://github.com/hagezi/dns-blocklists)  
 [OISD Blocklist Big](https://oisd.nl/)  
 [Peter Lowe's Blocklist](https://pgl.yoyo.org/adservers/)  
-[Dan Pollock's List](https://someonewhocares.org/hosts/)  
-[ddg-blocklist](https://github.com/hydroakri/ddg-blocklist) (DuckDuckGo tracker blocklist, own project)  
+[Dan Pollock's List](https://someonewhocares.org/hosts/)
+
 ### URL rules for ABP/uBO
+
 [uBlock filters](https://github.com/uBlockOrigin/uAssets)  
 [EasyList & EasyPrivacy & EasyList Cookie & Fanboy's Annoyance List](https://easylist.to/)  
 [AdGuard Annoyances](https://github.com/AdguardTeam/AdguardFilters/tree/master/AnnoyancesFilter)  
 [➗ Actually Legitimate URL Shortener Tool](https://github.com/DandelionSprout/adfilt/discussions/163)  
-[AdGuard URL Tracking Protection](https://github.com/AdguardTeam/AdguardFilters/raw/refs/heads/master/TrackParamFilter/sections/specific.txt)  
+[AdGuard URL Tracking Protection](https://github.com/AdguardTeam/AdguardFilters/raw/refs/heads/master/TrackParamFilter/sections/specific.txt)
 
-### Extended Reading:  
-[PrivacyGuide](https://www.privacyguides.org/en/browser-extensions/) recommends to use `AdGuard URL Tracking Protection` and [Actually Legitimate URL Shortener Tool](https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt) and [uBLockOrigin wiki](https://github.com/gorhill/uBlock/wiki/Reference-description-of-uBO-in-various-extensions-stores) mentioned they contained various list.  
+### Extended Reading:
+
+[PrivacyGuide](https://www.privacyguides.org/en/browser-extensions/) recommends to use `AdGuard URL Tracking Protection` and [Actually Legitimate URL Shortener Tool](https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt) and [uBLockOrigin wiki](https://github.com/gorhill/uBlock/wiki/Reference-description-of-uBO-in-various-extensions-stores) mentioned they contained various list.
+
 ### And..
+
 Read the [arkenfox wiki](https://github.com/arkenfox/user.js/wiki/4.1-Extensions) to get to know why you don't need so many extensions.
