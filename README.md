@@ -2,6 +2,7 @@
 
 https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist.txt  
 https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.txt
+https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist.txt
 
 Each run publishes two variants, each in four formats. A release/CDN push
 only happens when the generated domain set actually changed since the last
@@ -67,24 +68,28 @@ refreshes every 8 hours upstream.
 
 ### URL rules for ABP/uBO
 
-[uBlock filters – Ads](https://github.com/uBlockOrigin/uAssets/blob/master/filters/filters.txt),
-[Badware risks](https://github.com/uBlockOrigin/uAssets/blob/master/filters/badware.txt),
-[Privacy](https://github.com/uBlockOrigin/uAssets/blob/master/filters/privacy.txt),
-[Quick fixes](https://github.com/uBlockOrigin/uAssets/blob/master/filters/quick-fixes.txt),
-[Unbreak](https://github.com/uBlockOrigin/uAssets/blob/master/filters/unbreak.txt) —
-the five lists Mullvad Browser enables by default.  
-[EasyList](https://easylist.to/easylist/easylist.txt),
-[EasyPrivacy](https://easylist.to/easylist/easyprivacy.txt),
-[EasyList Cookie List](https://secure.fanboy.co.nz/fanboy-cookiemonster.txt),
-[Fanboy's Annoyance List](https://secure.fanboy.co.nz/fanboy-annoyance.txt)  
-[EasyList Adblock Warning Removal List (AWRL)](https://github.com/easylist/antiadblockfilters) —
-one of GrapheneOS Vanadium's three built-in primary filters.  
-[AdGuard Annoyances](https://github.com/AdguardTeam/AdguardFilters/tree/master/AnnoyancesFilter)  
-[➗ Actually Legitimate URL Shortener Tool](https://github.com/DandelionSprout/adfilt/discussions/163)  
-[AdGuard URL Tracking Protection](https://github.com/AdguardTeam/AdguardFilters/raw/refs/heads/master/TrackParamFilter/sections/specific.txt)  
-[Online Malicious URL Blocklist (uBO format)](https://malware-filter.gitlab.io/urlhaus-filter/urlhaus-filter-ag-online.txt) —
-same project as the DNS-level source above, but matches at the full-URL/path level,
-enabled by default in Mullvad Browser's uBO.
+[uBlock filters](https://github.com/uBlockOrigin/uAssets)
+([Ads](https://ublockorigin.github.io/uAssets/filters/filters.txt),
+[Badware risks](https://ublockorigin.github.io/uAssets/filters/badware.txt),
+[Privacy](https://ublockorigin.github.io/uAssets/filters/privacy.txt),
+[Quick fixes](https://ublockorigin.github.io/uAssets/filters/quick-fixes.txt),
+[Unbreak](https://ublockorigin.github.io/uAssets/filters/unbreak.txt))  
+[EasyList & EasyPrivacy](https://easylist.to/)
+([EasyList](https://easylist.to/easylist/easylist.txt),
+[EasyPrivacy](https://easylist.to/easylist/easyprivacy.txt))  
+[EasyList Cookie List & Fanboy's Annoyance List](https://fanboy.co.nz/)
+([Cookie List](https://secure.fanboy.co.nz/fanboy-cookiemonster_ubo.txt),
+[Annoyance List](https://secure.fanboy.co.nz/fanboy-annoyance_ubo.txt))  
+[EasyList Adblock Warning Removal List (AWRL)](https://github.com/easylist/antiadblockfilters)
+([antiadblockfilters.txt](https://easylist-downloads.adblockplus.org/antiadblockfilters.txt))  
+[AdGuard Annoyances](https://github.com/AdguardTeam/AdguardFilters/tree/master/AnnoyancesFilter)
+([filters/14.txt](https://filters.adtidy.org/extension/ublock/filters/14.txt))  
+[➗ Actually Legitimate URL Shortener Tool](https://github.com/DandelionSprout/adfilt/discussions/163)
+([LegitimateURLShortener.txt](https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt))  
+[AdGuard URL Tracking Protection](https://github.com/AdguardTeam/AdguardFilters/tree/master/TrackParamFilter)
+([filters/17.txt](https://filters.adtidy.org/extension/ublock/filters/17.txt))  
+[Online Malicious URL Blocklist (uBO format)](https://github.com/curbengh/urlhaus-filter)
+([urlhaus-filter-ag-online.txt](https://urlhaus-filter.pages.dev/urlhaus-filter-ag-online.txt))
 
 ### Extended Reading:
 
