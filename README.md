@@ -67,11 +67,24 @@ refreshes every 8 hours upstream.
 
 ### URL rules for ABP/uBO
 
-[uBlock filters](https://github.com/uBlockOrigin/uAssets)  
-[EasyList & EasyPrivacy & EasyList Cookie & Fanboy's Annoyance List](https://easylist.to/)  
+[uBlock filters – Ads](https://github.com/uBlockOrigin/uAssets/blob/master/filters/filters.txt),
+[Badware risks](https://github.com/uBlockOrigin/uAssets/blob/master/filters/badware.txt),
+[Privacy](https://github.com/uBlockOrigin/uAssets/blob/master/filters/privacy.txt),
+[Quick fixes](https://github.com/uBlockOrigin/uAssets/blob/master/filters/quick-fixes.txt),
+[Unbreak](https://github.com/uBlockOrigin/uAssets/blob/master/filters/unbreak.txt) —
+the five lists Mullvad Browser enables by default.  
+[EasyList](https://easylist.to/easylist/easylist.txt),
+[EasyPrivacy](https://easylist.to/easylist/easyprivacy.txt),
+[EasyList Cookie List](https://secure.fanboy.co.nz/fanboy-cookiemonster.txt),
+[Fanboy's Annoyance List](https://secure.fanboy.co.nz/fanboy-annoyance.txt)  
+[EasyList Adblock Warning Removal List (AWRL)](https://github.com/easylist/antiadblockfilters) —
+one of GrapheneOS Vanadium's three built-in primary filters.  
 [AdGuard Annoyances](https://github.com/AdguardTeam/AdguardFilters/tree/master/AnnoyancesFilter)  
 [➗ Actually Legitimate URL Shortener Tool](https://github.com/DandelionSprout/adfilt/discussions/163)  
-[AdGuard URL Tracking Protection](https://github.com/AdguardTeam/AdguardFilters/raw/refs/heads/master/TrackParamFilter/sections/specific.txt)
+[AdGuard URL Tracking Protection](https://github.com/AdguardTeam/AdguardFilters/raw/refs/heads/master/TrackParamFilter/sections/specific.txt)  
+[Online Malicious URL Blocklist (uBO format)](https://malware-filter.gitlab.io/urlhaus-filter/urlhaus-filter-ag-online.txt) —
+same project as the DNS-level source above, but matches at the full-URL/path level,
+enabled by default in Mullvad Browser's uBO.
 
 ### Extended Reading:
 
