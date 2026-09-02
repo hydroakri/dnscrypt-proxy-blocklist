@@ -68,28 +68,48 @@ refreshes every 8 hours upstream.
 
 ### URL rules for ABP/uBO
 
+#### uBlock Origin
+
 [uBlock filters](https://github.com/uBlockOrigin/uAssets)
 ([Ads](https://ublockorigin.github.io/uAssets/filters/filters.txt),
 [Badware risks](https://ublockorigin.github.io/uAssets/filters/badware.txt),
 [Privacy](https://ublockorigin.github.io/uAssets/filters/privacy.txt),
 [Quick fixes](https://ublockorigin.github.io/uAssets/filters/quick-fixes.txt),
-[Unbreak](https://ublockorigin.github.io/uAssets/filters/unbreak.txt))  
+[Unbreak](https://ublockorigin.github.io/uAssets/filters/unbreak.txt)) —
+the five lists Mullvad Browser enables by default.
+
+#### EasyList
+
 [EasyList & EasyPrivacy](https://easylist.to/)
 ([EasyList](https://easylist.to/easylist/easylist.txt),
 [EasyPrivacy](https://easylist.to/easylist/easyprivacy.txt))  
-[EasyList Cookie List & Fanboy's Annoyance List](https://fanboy.co.nz/)
-([Cookie List](https://secure.fanboy.co.nz/fanboy-cookiemonster_ubo.txt),
-[Annoyance List](https://secure.fanboy.co.nz/fanboy-annoyance_ubo.txt))  
 [EasyList Adblock Warning Removal List (AWRL)](https://github.com/easylist/antiadblockfilters)
-([antiadblockfilters.txt](https://easylist-downloads.adblockplus.org/antiadblockfilters.txt))  
+([antiadblockfilters.txt](https://easylist-downloads.adblockplus.org/antiadblockfilters.txt)) —
+one of GrapheneOS Vanadium's three built-in primary filters.
+
+#### AdGuard
+
 [AdGuard Annoyances](https://github.com/AdguardTeam/AdguardFilters/tree/master/AnnoyancesFilter)
 ([filters/14.txt](https://filters.adtidy.org/extension/ublock/filters/14.txt))  
+[AdGuard URL Tracking Protection](https://github.com/AdguardTeam/AdguardFilters/tree/master/TrackParamFilter)
+([filters/17.txt](https://filters.adtidy.org/extension/ublock/filters/17.txt))
+
+#### Fanboy
+
+[EasyList Cookie List](https://fanboy.co.nz/) (uBO catalog name: "EasyList – Cookie Notices")
+& [Fanboy's Annoyance List](https://fanboy.co.nz/)
+([Cookie List](https://secure.fanboy.co.nz/fanboy-cookiemonster_ubo.txt),
+[Annoyance List](https://secure.fanboy.co.nz/fanboy-annoyance_ubo.txt)) —
+hosted by Fanboy, not EasyList, despite the "EasyList Cookie List" name.
+
+#### Independent
+
 [➗ Actually Legitimate URL Shortener Tool](https://github.com/DandelionSprout/adfilt/discussions/163)
 ([LegitimateURLShortener.txt](https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt))  
-[AdGuard URL Tracking Protection](https://github.com/AdguardTeam/AdguardFilters/tree/master/TrackParamFilter)
-([filters/17.txt](https://filters.adtidy.org/extension/ublock/filters/17.txt))  
 [Online Malicious URL Blocklist (uBO format)](https://github.com/curbengh/urlhaus-filter)
-([urlhaus-filter-ag-online.txt](https://urlhaus-filter.pages.dev/urlhaus-filter-ag-online.txt))
+([urlhaus-filter-ag-online.txt](https://urlhaus-filter.pages.dev/urlhaus-filter-ag-online.txt)) —
+same project as the DNS-level source above, but matches at the full-URL/path level,
+enabled by default in Mullvad Browser's uBO.
 
 ### Extended Reading:
 
