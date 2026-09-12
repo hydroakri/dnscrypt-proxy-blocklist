@@ -4,10 +4,10 @@ https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/b
 https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.txt
 https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist.txt
 
-Each run publishes two variants, each in four formats. A release/CDN push
-only happens when the generated domain set actually changed since the last
-run (`state.json` tracks a hash per variant; nothing changed → no new
-release, no CDN purge).
+Each run publishes two DNS-domain variants (each in four formats) plus one
+ABP/uBO filter list. A release/CDN push only happens when the generated set
+actually changed since the last run (`state.json` tracks a hash per variant;
+nothing changed → no new release, no CDN purge).
 
 ## Variants
 
@@ -19,6 +19,10 @@ release, no CDN purge).
   tracker list. Target size is under 10MB, measured per CI run rather than
   hard-capped — TIF mini alone is ~170k domains, so actual size depends on
   upstream list churn.
+- **`ubo-filterlist.txt`** — ABP/uBlock Origin syntax, not a domain list. Add
+  as a custom uBO subscription. Merged from
+  ["URL rules for ABP/uBO"](#url-rules-for-abpubo) via
+  [`ubo-sources.json`](ubo-sources.json).
 
 ## Formats
 
@@ -68,6 +72,11 @@ refreshes every 8 hours upstream.
 
 ### URL rules for ABP/uBO
 
+These sources feed [`ubo-sources.json`](ubo-sources.json), merged by CI into
+`ubo-filterlist.txt`; edit both together. Tor ships no default filter list;
+Brave's baseline (EasyList/EasyPrivacy) is already covered below, so neither
+gets its own entry.
+
 #### uBlock Origin
 
 [uBlock filters](https://github.com/uBlockOrigin/uAssets)
@@ -110,6 +119,47 @@ hosted by Fanboy, not EasyList, despite the "EasyList Cookie List" name.
 ([urlhaus-filter-ag-online.txt](https://urlhaus-filter.pages.dev/urlhaus-filter-ag-online.txt)) —
 same project as the DNS-level source above, but matches at the full-URL/path level,
 enabled by default in Mullvad Browser's uBO.
+
+#### GrapheneOS Vanadium
+
+Baked into Chromium's subresource filter at build time (not a subscribable
+list), per [`.gclient`](https://github.com/GrapheneOS/Vanadium/blob/main/.gclient):
+[Arabic](https://easylist-downloads.adblockplus.org/liste_ar.txt),
+[Bulgarian](https://stanev.org/abp/adblock_bg.txt),
+[Spanish](https://easylist-downloads.adblockplus.org/easylistspanish.txt),
+[French](https://easylist-downloads.adblockplus.org/liste_fr.txt),
+[German](https://easylist.to/easylistgermany/easylistgermany.txt),
+[Hebrew](https://raw.githubusercontent.com/easylist/EasyListHebrew/master/EasyListHebrew.txt),
+[Indian](https://easylist-downloads.adblockplus.org/indianlist.txt),
+[Indonesian](https://raw.githubusercontent.com/heradhis/indonesianadblockrules/master/subscriptions/abpindo.txt),
+[Italian](https://easylist-downloads.adblockplus.org/easylistitaly.txt),
+[Korean](https://easylist-downloads.adblockplus.org/koreanlist.txt),
+[Lithuanian](https://raw.githubusercontent.com/EasyList-Lithuania/easylist_lithuania/master/easylistlithuania.txt),
+[Latvian](https://raw.githubusercontent.com/Latvian-List/adblock-latvian/master/lists/latvian-list.txt),
+[Dutch](https://easylist-downloads.adblockplus.org/easylistdutch.txt),
+[Norwegian/Nordic](<https://raw.githubusercontent.com/DandelionSprout/adfilt/master/NorwegianExperimentalList%20alternate%20versions/NordicFiltersABP-Inclusion.txt>),
+[Polish](https://easylist-downloads.adblockplus.org/easylistpolish.txt),
+[Portuguese](https://easylist-downloads.adblockplus.org/easylistportuguese.txt),
+[Romanian](https://zoso.ro/pages/rolist.txt),
+[Russian](https://easylist-downloads.adblockplus.org/ruadlist.txt),
+[Vietnamese](https://abpvn.com/filter/abpvn-IPl6HE.txt),
+[Chinese](https://easylist-downloads.adblockplus.org/easylistchina.txt) —
+all of the above are also used by Trivalent (below) except where it uses a
+different source for the same language.
+
+#### secureblue Trivalent
+
+Same setup as Vanadium, per
+[`copr_script.sh`](https://github.com/secureblue/trivalent-subresource-filter/blob/live/copr_script.sh).
+Shares Vanadium's list above, plus:
+[Fanboy Annoyance List, full version](https://secure.fanboy.co.nz/fanboy-annoyance.txt)
+(vs. the trimmed uBO version already listed under Fanboy above),
+[Czech & Slovak](https://raw.githubusercontent.com/tomasko126/easylistczechandslovak/master/filters.txt),
+[Dutch (AdGuard)](https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_8_Dutch/filter.txt)
+(Trivalent uses this instead of Vanadium's EasyList Dutch above),
+[Serbo-Croatian](https://raw.githubusercontent.com/DandelionSprout/adfilt/refs/heads/master/SerboCroatianList.txt),
+[Swedish](https://raw.githubusercontent.com/lassekongo83/Frellwits-filter-lists/master/Frellwits-Swedish-Filter.txt),
+[Japanese (AdGuard)](https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_7_Japanese/filter.txt).
 
 ### Extended Reading:
 
