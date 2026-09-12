@@ -1,10 +1,12 @@
 # This GitHub Actions workflow fetches and merges blocklists on a schedule
 # using the `generate-domains-blocklist.py` from the official dnscrypt-proxy repository.
 #
-# It builds two variants (big + mini) in four formats each (dnscrypt-proxy
-# plain text, sing-box JSON/SRS, Unbound RPZ), but only cuts a new release /
+# It builds two DNS-domain variants (big + mini) in four formats each (dnscrypt-proxy
+# plain text, sing-box JSON/SRS, Unbound RPZ), plus a merged ABP/uBO-syntax filter
+# list (`ubo-filterlist.txt`, via @adguard/hostlist-compiler and `ubo-sources.json`)
+# for use as a uBlock Origin subscription. It only cuts a new release /
 # force-pushes the `release` branch / purges the CDN / commits state.json
-# when the generated domain set actually changed since the last run.
+# when any of these generated sets actually changed since the last run.
 
 name: Update Blocklist
 
@@ -52,6 +54,11 @@ jobs:
           python -m pip install --upgrade pip
           # If your script requires extra libraries, install them here
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Generate merged blocklist (big)
         run: |
           # Ensure domains-blocklist.conf, allowlist and time-restricted files are in the repo root
@@ -74,6 +81,32 @@ jobs:
           echo "blocklist-mini.txt size:"
           du -h blocklist-mini.txt
 
+      - name: Fetch previous uBO filter list (fallback)
+        run: |
+          # Seeds ubo-filterlist.txt with the last published version so the release
+          # branch always has a copy, even if today's regeneration below fails.
+          curl -fsSL -o ubo-filterlist.txt \
+            "https://raw.githubusercontent.com/${{ github.repository }}/release/ubo-filterlist.txt" \
+            || echo "No previously published ubo-filterlist.txt (first run?)"
+
+      - name: Generate uBO filter list
+        id: ubo
+        continue-on-error: true
+        run: |
+          npx --yes @adguard/hostlist-compiler@2.1.1 -c ubo-sources.json -o ubo-filterlist.txt.new
+
+      - name: Validate uBO filter list
+        id: ubo_validate
+        run: |
+          if [ "${{ steps.ubo.outcome }}" = "success" ] && [ -s ubo-filterlist.txt.new ]; then
+            mv ubo-filterlist.txt.new ubo-filterlist.txt
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::uBO filter list generation failed or produced an empty file; keeping previous ubo-filterlist.txt (source list unchanged this run)"
+            rm -f ubo-filterlist.txt.new
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Detect changes
         id: diff
         run: |
@@ -81,11 +114,19 @@ jobs:
           NEW_MINI=$(sha256sum blocklist-mini.txt | cut -d' ' -f1)
           OLD_BIG=$(jq -r '.big // ""' state.json)
           OLD_MINI=$(jq -r '.mini // ""' state.json)
+          OLD_UBO=$(jq -r '.ubo // ""' state.json)
+
+          if [ "${{ steps.ubo_validate.outputs.ok }}" = "true" ]; then
+            NEW_UBO=$(sha256sum ubo-filterlist.txt | cut -d' ' -f1)
+          else
+            NEW_UBO="$OLD_UBO"
+          fi
 
           echo "new_big=$NEW_BIG" >> "$GITHUB_OUTPUT"
           echo "new_mini=$NEW_MINI" >> "$GITHUB_OUTPUT"
+          echo "new_ubo=$NEW_UBO" >> "$GITHUB_OUTPUT"
 
-          if [ "${{ github.event.inputs.force }}" = "true" ] || [ "$NEW_BIG" != "$OLD_BIG" ] || [ "$NEW_MINI" != "$OLD_MINI" ]; then
+          if [ "${{ github.event.inputs.force }}" = "true" ] || [ "$NEW_BIG" != "$OLD_BIG" ] || [ "$NEW_MINI" != "$OLD_MINI" ] || [ "$NEW_UBO" != "$OLD_UBO" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -217,6 +258,7 @@ jobs:
           mkdir -p publish
           cp blocklist.txt blocklist.json blocklist.srs blocklist.rpz publish/
           cp blocklist-mini.txt blocklist-mini.json blocklist-mini.srs blocklist-mini.rpz publish/
+          cp ubo-filterlist.txt publish/
 
       - name: Release and upload assets
         if: steps.diff.outputs.changed == 'true'
@@ -252,7 +294,7 @@ jobs:
       - name: Commit updated state.json
         if: steps.diff.outputs.changed == 'true'
         run: |
-          echo "{\"big\": \"${{ steps.diff.outputs.new_big }}\", \"mini\": \"${{ steps.diff.outputs.new_mini }}\"}" > state.json
+          echo "{\"big\": \"${{ steps.diff.outputs.new_big }}\", \"mini\": \"${{ steps.diff.outputs.new_mini }}\", \"ubo\": \"${{ steps.diff.outputs.new_ubo }}\"}" > state.json
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git add state.json
