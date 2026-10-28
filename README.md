@@ -20,13 +20,24 @@ nothing changed → no new release, no CDN purge).
   [Peter Lowe's](https://pgl.yoyo.org/adservers/),
   [smed79/easylist-hosts](https://github.com/smed79/easylist-hosts)
   (derived from EasyList, EasyPrivacy, Fanboy Annoyance and regional lists),
-  217heidai/adblockfilters (CN only), plus hosts exports of
+  217heidai/adblockfilters (CN-focused lite aggregate, ~8.5k domains), plus hosts exports of
   [ABPindo](https://github.com/ABPindo/indonesianadblockrules),
   [EasyList Hebrew](https://github.com/easylist/EasyListHebrew),
   [EasyList Lithuania](https://github.com/EasyList-Lithuania/easylist_lithuania),
   [Frellwit's Swedish](https://github.com/lassekongo83/Frellwits-filter-lists) and
   [Dandelion Sprout's Nordic](https://github.com/DandelionSprout/adfilt)
-  filters. About 160k domains; actual size depends on upstream list churn.
+  filters. Lists that exist only in ABP/uBO syntax (uBlock filters, cookie
+  lists, Fanboy mobile, Brave's own lists, URL-parameter lists, and the
+  Bulgarian, Latvian, RoList, ABPVN, Serbo-Croatian, AdGuard Japanese/Dutch
+  regional lists) are deliberately not converted: their rules depend on paths,
+  options and exceptions that a domain block cannot express, so converting them
+  would add false positives. Use `ubo-filterlist.txt` for those. About 160k
+  domains (roughly 45% smaller than the previous HaGeZi-based mini); actual size
+  depends on upstream churn. Each source in `domains-blocklist-mini.conf` is
+  annotated with the browsers that enable it. smed79 also includes lists
+  browsers do not enable by default (Turkish, Persian, Spam404, ABP
+  Dutch/Japanese). Domain entries also block their subdomains in dnscrypt-proxy,
+  which is broader than the exact-match hosts semantics of the upstream files.
 - **`ubo-filterlist.txt`** — ABP/uBlock Origin syntax, not a domain list. Add
   as a custom uBO subscription. Merged from
   ["URL rules for ABP/uBO"](#url-rules-for-abpubo) via
