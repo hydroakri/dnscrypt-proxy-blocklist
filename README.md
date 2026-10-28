@@ -13,12 +13,20 @@ nothing changed → no new release, no CDN purge).
 
 - **big** (`blocklist.*`) — full list, all sources below under "DNS domains".
 - **mini** (`blocklist-mini.*`) — smaller variant for setups that don't need
-  the full list. Sources: [HaGeZi Pro Mini](https://github.com/hagezi/dns-blocklists),
-  [OISD Small](https://oisd.nl/), [HaGeZi Threat Intelligence Feeds (mini)](https://github.com/hagezi/dns-blocklists),
-  [Online Malicious URL Blocklist](https://github.com/curbengh/urlhaus-filter),
-  tracker list. Target size is under 10MB, measured per CI run rather than
-  hard-capped — TIF mini alone is ~170k domains, so actual size depends on
-  upstream list churn.
+  the full list. Mirrors the default-enabled filter lists of privacy browsers
+  (Mullvad, LibreWolf, Brave, Vanadium, Trivalent) as far as a DNS-level
+  equivalent exists. Sources: [Online Malicious URL Blocklist](https://github.com/curbengh/urlhaus-filter),
+  [Phishing URL Blocklist](https://github.com/curbengh/phishing-filter),
+  [Peter Lowe's](https://pgl.yoyo.org/adservers/),
+  [smed79/easylist-hosts](https://github.com/smed79/easylist-hosts)
+  (derived from EasyList, EasyPrivacy, Fanboy Annoyance and regional lists),
+  217heidai/adblockfilters (CN only), plus hosts exports of
+  [ABPindo](https://github.com/ABPindo/indonesianadblockrules),
+  [EasyList Hebrew](https://github.com/easylist/EasyListHebrew),
+  [EasyList Lithuania](https://github.com/EasyList-Lithuania/easylist_lithuania),
+  [Frellwit's Swedish](https://github.com/lassekongo83/Frellwits-filter-lists) and
+  [Dandelion Sprout's Nordic](https://github.com/DandelionSprout/adfilt)
+  filters. About 160k domains; actual size depends on upstream list churn.
 - **`ubo-filterlist.txt`** — ABP/uBlock Origin syntax, not a domain list. Add
   as a custom uBO subscription. Merged from
   ["URL rules for ABP/uBO"](#url-rules-for-abpubo) via
@@ -68,6 +76,7 @@ refreshes every 8 hours upstream.
 [HaGeZi's Pro Blocklist & Threat Intelligence Feeds](https://github.com/hagezi/dns-blocklists)  
 [OISD Blocklist Big](https://oisd.nl/)  
 [Peter Lowe's Blocklist](https://pgl.yoyo.org/adservers/)  
+[Phishing URL Blocklist](https://github.com/curbengh/phishing-filter), [smed79/easylist-hosts](https://github.com/smed79/easylist-hosts), and regional hosts lists (mini only; see Variants)  
 [Dan Pollock's List](https://someonewhocares.org/hosts/)
 
 ### URL rules for ABP/uBO
