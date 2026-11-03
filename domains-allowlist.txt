@@ -5,3 +5,6 @@
 www.supportxmr.com
 pool.supportxmr.com
 supportxmr.com
+kryptex.com
+pool.kryptex.com
+www.kryptex.com
