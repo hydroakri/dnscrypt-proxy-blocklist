@@ -8,3 +8,6 @@ supportxmr.com
 kryptex.com
 pool.kryptex.com
 www.kryptex.com
+kryptex.network
+xmr.kryptex.network
+xmr-api.kryptex.network
