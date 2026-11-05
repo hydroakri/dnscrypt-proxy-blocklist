@@ -2,13 +2,5 @@
 gg.apple.com
 gdmf.apple.com
 gdmf.apple.com.akadns.net
-mesu-cdn.apple.com.akadns.net
-mesu-cdn.origin-apple.com.akadns.net
-mesu.apple.com
-mesu.g.aaplimg.com
-updates.cdn-apple.com
-updates-http.cdn-apple.com
-xp.apple.com
-ocsp.apple.com
-appldnld.apple.com
 swscan.apple.com
+swdist.apple.com
