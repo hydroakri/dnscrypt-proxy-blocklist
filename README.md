@@ -24,7 +24,7 @@ Updates are published only when the generated content changes (`state.json` stor
 
 | Variant | Files | Content | Pick it when |
 | --- | --- | --- | --- |
-| **big** | `blocklist.*` | Full list: ads, tracking, malware, phishing, plus Chinese lists | You want maximum coverage. |
+| **big** | `blocklist.*` | Everything in mini, plus HaGeZi, OISD, anti-AD, Dan Pollock's and other large lists | You want maximum coverage. |
 | **mini** | `blocklist-mini.*` | Default filter lists of privacy browsers (Mullvad, LibreWolf, Brave, Vanadium, Trivalent) and their regional language lists, where a DNS-level export exists. Also includes a few extra lists browsers don't enable by default | You want a smaller list with fewer false positives. |
 | **uBO** | `ubo-filterlist.txt` | URL/path rules, not a domain list | You need cosmetic, cookie-notice, or URL-parameter filtering. Add it as a custom uBO subscription. |
 
@@ -57,11 +57,13 @@ Dashboard → Filter lists → Import → paste the `ubo-filterlist.txt` URL.
 
 - **Time windows:** entries in `domains-time-restricted.txt` (the `@tag` syntax) work only in the `.txt` format. In `.json`, `.srs` and `.rpz` they are blocked all the time.
 - **Subdomains:** a domain entry also blocks its subdomains in dnscrypt-proxy. This is broader than the exact-match semantics of the upstream hosts files.
+- **Overlap:** sources overlap on purpose. DNS lists drop duplicates and redundant subdomains. `ubo-filterlist.txt` drops exact duplicate lines only, so rules with the same meaning but different text stay. Details in [`BROWSER-DEFAULTS.md`](BROWSER-DEFAULTS.md#overlap-and-deduplication).
+- **uBO list:** rules inside `!#if` blocks that the compiler cannot evaluate are dropped, for example Firefox-only and HTML-filtering rules from uBlock filters. uBO already ships those lists built in, so enable them there as well.
 - **Mini variant:** lists that exist only in ABP/uBO syntax are not converted to domains, because a domain block cannot express their path rules and would cause false positives. This covers Brave's own lists, URL-parameter lists, and the Bulgarian, Latvian, RoList, ABPVN, Serbo-Croatian and AdGuard Japanese/Dutch regional lists. Use `ubo-filterlist.txt` for those.
 
 ## Sources
 
-The config files are the source of truth. Edit them, not this README.
+The config files are the source of truth. Edit them, not this README. Why each browser-derived source is included, with pinned evidence, is in [`BROWSER-DEFAULTS.md`](BROWSER-DEFAULTS.md).
 
 | Output | Config | Merged by |
 | --- | --- | --- |
@@ -77,9 +79,9 @@ Local lists:
 
 Main upstream projects:
 
-- **big:** [anti-AD](https://github.com/privacy-protection-tools/anti-AD), [217heidai/adblockfilters](https://github.com/217heidai/adblockfilters), [HaGeZi](https://github.com/hagezi/dns-blocklists), [OISD](https://oisd.nl/), [Peter Lowe's](https://pgl.yoyo.org/adservers/), [Dan Pollock's](https://someonewhocares.org/hosts/), [URLhaus filter](https://github.com/curbengh/urlhaus-filter)
-- **mini:** URLhaus and [Phishing filter](https://github.com/curbengh/phishing-filter), Peter Lowe's, [smed79/easylist-hosts](https://github.com/smed79/easylist-hosts), 217heidai/adblockfilters (lite), and regional hosts exports (see the config)
-- **uBO:** uBlock filters, EasyList/EasyPrivacy, AdGuard Annoyances and URL Tracking Protection, Fanboy lists, and the regional lists that Vanadium and Trivalent ship
+- **big:** [anti-AD](https://github.com/privacy-protection-tools/anti-AD), [217heidai/adblockfilters](https://github.com/217heidai/adblockfilters), [HaGeZi](https://github.com/hagezi/dns-blocklists), [OISD](https://oisd.nl/), [Peter Lowe's](https://pgl.yoyo.org/adservers/), [Dan Pollock's](https://someonewhocares.org/hosts/), [URLhaus filter](https://github.com/curbengh/urlhaus-filter), plus every source of mini
+- **mini:** URLhaus, Peter Lowe's, [smed79/easylist-hosts](https://github.com/smed79/easylist-hosts), 217heidai/adblockfilters (lite), and regional hosts exports (see the config)
+- **uBO:** uBlock filters, EasyList/EasyPrivacy, AdGuard Annoyances and URL Tracking Protection, Fanboy lists, Peter Lowe's, URLhaus, and the regional lists that Vanadium and Trivalent ship
 
 ## See also
 

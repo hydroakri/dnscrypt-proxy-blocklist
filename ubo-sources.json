@@ -49,8 +49,13 @@
       "type": "adblock"
     },
     {
-      "name": "AdGuard URL Tracking Protection",
+      "name": "AdGuard URL Tracking Protection (AdGuard filter 17)",
       "source": "https://filters.adtidy.org/extension/ublock/filters/17.txt",
+      "type": "adblock"
+    },
+    {
+      "name": "AdGuard/uBO URL Tracking Protection (uBO catalog, Privacy Guides and arkenfox)",
+      "source": "https://ublockorigin.github.io/uAssets/filters/privacy-removeparam.txt",
       "type": "adblock"
     },
     {
@@ -70,10 +75,37 @@
     },
     {
       "name": "Online Malicious URL Blocklist (uBO format)",
-      "source": "https://urlhaus-filter.pages.dev/urlhaus-filter-ag-online.txt",
+      "source": "https://curbengh.github.io/urlhaus-filter/urlhaus-filter-ag-online.txt",
       "type": "adblock"
     },
-
+    {
+      "name": "Mobile app promo blocker - Fanboy (Brave default)",
+      "source": "https://secure.fanboy.co.nz/fanboy-mobile-notifications.txt",
+      "type": "adblock"
+    },
+    {
+      "name": "uBlock filters - Resource abuse (Brave default)",
+      "source": "https://ublockorigin.github.io/uAssets/filters/resource-abuse.txt",
+      "type": "adblock"
+    },
+    {
+      "name": "uBlock filters - Link shorteners (Brave default)",
+      "source": "https://ublockorigin.github.io/uAssets/filters/ubo-link-shorteners.txt",
+      "type": "adblock"
+    },
+    {
+      "name": "uBlock filters - Cookie notices (Brave default)",
+      "source": "https://ublockorigin.github.io/uAssets/filters/annoyances-cookies.txt",
+      "type": "adblock"
+    },
+    {
+      "name": "Peter Lowe's Ad and tracking server list (uBO default: Mullvad Browser/LibreWolf)",
+      "source": "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext",
+      "type": "hosts",
+      "transformations": [
+        "Compress"
+      ]
+    },
     {
       "name": "EasyList Arabic (Vanadium+Trivalent)",
       "source": "https://easylist-downloads.adblockplus.org/liste_ar.txt",
