@@ -1,190 +1,116 @@
-# This is dnscrypt-proxy blocklist for personal use
+# dnscrypt-proxy blocklist
 
-https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist.txt  
-https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.txt
-https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist.txt
+Personal DNS blocklist, rebuilt by CI and published in several formats.
 
-Each run publishes two DNS-domain variants (each in four formats) plus one
-ABP/uBO filter list. A release/CDN push only happens when the generated set
-actually changed since the last run (`state.json` tracks a hash per variant;
-nothing changed → no new release, no CDN purge).
+## Download
 
-## Variants
+Pick one row. Each row has three mirrors with identical content.
 
-- **big** (`blocklist.*`) — full list, all sources below under "DNS domains".
-- **mini** (`blocklist-mini.*`) — smaller variant for setups that don't need
-  the full list. Mirrors the default-enabled filter lists of privacy browsers
-  (Mullvad, LibreWolf, Brave, Vanadium, Trivalent) as far as a DNS-level
-  equivalent exists. Sources: [Online Malicious URL Blocklist](https://github.com/curbengh/urlhaus-filter),
-  [Phishing URL Blocklist](https://github.com/curbengh/phishing-filter),
-  [Peter Lowe's](https://pgl.yoyo.org/adservers/),
-  [smed79/easylist-hosts](https://github.com/smed79/easylist-hosts)
-  (derived from EasyList, EasyPrivacy, Fanboy Annoyance and regional lists),
-  217heidai/adblockfilters (CN-focused lite aggregate, ~8.5k domains), plus hosts exports of
-  [ABPindo](https://github.com/ABPindo/indonesianadblockrules),
-  [EasyList Hebrew](https://github.com/easylist/EasyListHebrew),
-  [EasyList Lithuania](https://github.com/EasyList-Lithuania/easylist_lithuania),
-  [Frellwit's Swedish](https://github.com/lassekongo83/Frellwits-filter-lists) and
-  [Dandelion Sprout's Nordic](https://github.com/DandelionSprout/adfilt)
-  filters. Lists that exist only in ABP/uBO syntax (uBlock filters, cookie
-  lists, Fanboy mobile, Brave's own lists, URL-parameter lists, and the
-  Bulgarian, Latvian, RoList, ABPVN, Serbo-Croatian, AdGuard Japanese/Dutch
-  regional lists) are deliberately not converted: their rules depend on paths,
-  options and exceptions that a domain block cannot express, so converting them
-  would add false positives. Use `ubo-filterlist.txt` for those. About 160k
-  domains (roughly 45% smaller than the previous HaGeZi-based mini); actual size
-  depends on upstream churn. Each source in `domains-blocklist-mini.conf` is
-  annotated with the browsers that enable it. smed79 also includes lists
-  browsers do not enable by default (Turkish, Persian, Spam404, ABP
-  Dutch/Japanese). Domain entries also block their subdomains in dnscrypt-proxy,
-  which is broader than the exact-match hosts semantics of the upstream files.
-- **`ubo-filterlist.txt`** — ABP/uBlock Origin syntax, not a domain list. Add
-  as a custom uBO subscription. Merged from
-  ["URL rules for ABP/uBO"](#url-rules-for-abpubo) via
-  [`ubo-sources.json`](ubo-sources.json).
+| File | Format | Used by | GitHub Release | jsDelivr CDN | Raw |
+| --- | --- | --- | --- | --- | --- |
+| `blocklist.txt` | plain domains | dnscrypt-proxy | [link][r-big-txt] | [link][c-big-txt] | [link][w-big-txt] |
+| `blocklist.json` | rule-set source | sing-box | [link][r-big-json] | [link][c-big-json] | [link][w-big-json] |
+| `blocklist.srs` | rule-set binary | sing-box | [link][r-big-srs] | [link][c-big-srs] | [link][w-big-srs] |
+| `blocklist.rpz` | RPZ zone | Unbound | [link][r-big-rpz] | [link][c-big-rpz] | [link][w-big-rpz] |
+| `blocklist-mini.txt` | plain domains | dnscrypt-proxy | [link][r-mini-txt] | [link][c-mini-txt] | [link][w-mini-txt] |
+| `blocklist-mini.json` | rule-set source | sing-box | [link][r-mini-json] | [link][c-mini-json] | [link][w-mini-json] |
+| `blocklist-mini.srs` | rule-set binary | sing-box | [link][r-mini-srs] | [link][c-mini-srs] | [link][w-mini-srs] |
+| `blocklist-mini.rpz` | RPZ zone | Unbound | [link][r-mini-rpz] | [link][c-mini-rpz] | [link][w-mini-rpz] |
+| `ubo-filterlist.txt` | ABP/uBO syntax | uBlock Origin | [link][r-ubo] | [link][c-ubo] | [link][w-ubo] |
 
-## Formats
+Updates are published only when the generated content changes (`state.json` stores a hash per variant).
 
-- `.txt` — dnscrypt-proxy plain domain list (the original format).
-- `.json` / `.srs` — [sing-box](https://sing-box.sagernet.org/) rule-set
-  (JSON source + compiled binary).
-- `.rpz` — [Unbound](https://unbound.docs.nlnetlabs.nl/) Response Policy
-  Zone. Point Unbound at the released file with something like:
-  ```
-  rpz:
-    name: "dnscrypt-proxy-blocklist"
-    zonefile: "/path/to/blocklist.rpz"
-    url: "https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.rpz"
-  ```
-  The SOA refresh interval in the file controls how often Unbound re-polls
-  the `url:` source.
+## Which variant?
 
-**Limitation:** entries in `domains-time-restricted.txt` (the `@tag`
-time-window syntax) only work in the `.txt` format, which dnscrypt-proxy
-itself interprets. The `.json`/`.srs`/`.rpz` formats have no time-window
-concept, so those entries are blocked unconditionally in those formats.
+| Variant | Files | Content | Pick it when |
+| --- | --- | --- | --- |
+| **big** | `blocklist.*` | Full list: ads, tracking, malware, phishing, plus Chinese lists | You want maximum coverage. |
+| **mini** | `blocklist-mini.*` | Default filter lists of privacy browsers (Mullvad, LibreWolf, Brave, Vanadium, Trivalent) and their regional language lists, where a DNS-level export exists. Also includes a few extra lists browsers don't enable by default | You want a smaller list with fewer false positives. |
+| **uBO** | `ubo-filterlist.txt` | URL/path rules, not a domain list | You need cosmetic, cookie-notice, or URL-parameter filtering. Add it as a custom uBO subscription. |
 
-## Some details
+## Usage
 
-Lists are merged with the [`generate-domains-blocklist.py`](https://github.com/DNSCrypt/dnscrypt-proxy/wiki/Combining-Blocklists)
-script from the official dnscrypt-proxy repo, which converts common
-third-party list formats (hosts files, wildcard domain lists, etc.) into
-dnscrypt-proxy's format, then dedupes and merges overlapping entries.
+### dnscrypt-proxy
 
-### DNS domains
+Point `blocked_names_file` at `blocklist.txt` (or the mini file) in your blocklist settings.
 
-[CHN: AdRules DNS List](https://github.com/Cats-Team/AdRules)  
-[CHN: anti-AD](https://github.com/privacy-protection-tools/anti-AD)  
-[CHN: 217heidai/adblockfilters](https://github.com/217heidai/adblockfilters) —
-we only take its merged Chinese-domain hosts output (`adblockhosts.txt` for
-big, `adblockhostslite.txt` for mini), not the full project. That upstream
-project itself aggregates ~20 Chinese-focused sources (AdGuard Base/Chinese/
-Mobile Ads/DNS filters, EasyList/EasyList China/EasyPrivacy, AdRules DNS
-List, OISD Basic, AWAvenue Ads Rule, StevenBlack hosts, Dan Pollock's hosts,
-and others), dedupes them, and prunes domains that no longer resolve. It
-refreshes every 8 hours upstream.  
-[Online Malicious URL Blocklist](https://github.com/curbengh/urlhaus-filter)  
-[HaGeZi's Pro Blocklist & Threat Intelligence Feeds](https://github.com/hagezi/dns-blocklists)  
-[OISD Blocklist Big](https://oisd.nl/)  
-[Peter Lowe's Blocklist](https://pgl.yoyo.org/adservers/)  
-[Phishing URL Blocklist](https://github.com/curbengh/phishing-filter), [smed79/easylist-hosts](https://github.com/smed79/easylist-hosts), and regional hosts lists (mini only; see Variants)  
-[Dan Pollock's List](https://someonewhocares.org/hosts/)
+### sing-box
 
-### URL rules for ABP/uBO
+Use `.srs` as a remote rule-set. The `.json` file is its source form.
 
-These sources feed [`ubo-sources.json`](ubo-sources.json), merged by CI into
-`ubo-filterlist.txt`; edit both together. Tor ships no default filter list;
-Brave's baseline (EasyList/EasyPrivacy) is already covered below, so neither
-gets its own entry.
+### Unbound
 
-#### uBlock Origin
+```
+rpz:
+  name: "dnscrypt-proxy-blocklist"
+  zonefile: "/path/to/blocklist.rpz"
+  url: "https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.rpz"
+```
 
-[uBlock filters](https://github.com/uBlockOrigin/uAssets)
-([Ads](https://ublockorigin.github.io/uAssets/filters/filters.txt),
-[Badware risks](https://ublockorigin.github.io/uAssets/filters/badware.txt),
-[Privacy](https://ublockorigin.github.io/uAssets/filters/privacy.txt),
-[Quick fixes](https://ublockorigin.github.io/uAssets/filters/quick-fixes.txt),
-[Unbreak](https://ublockorigin.github.io/uAssets/filters/unbreak.txt)) —
-the five lists Mullvad Browser enables by default.
+The SOA refresh interval in the file controls how often Unbound re-polls `url:`.
 
-#### EasyList
+### uBlock Origin
 
-[EasyList & EasyPrivacy](https://easylist.to/)
-([EasyList](https://easylist.to/easylist/easylist.txt),
-[EasyPrivacy](https://easylist.to/easylist/easyprivacy.txt))  
-[EasyList Adblock Warning Removal List (AWRL)](https://github.com/easylist/antiadblockfilters)
-([antiadblockfilters.txt](https://easylist-downloads.adblockplus.org/antiadblockfilters.txt)) —
-one of GrapheneOS Vanadium's three built-in primary filters.
+Dashboard → Filter lists → Import → paste the `ubo-filterlist.txt` URL.
 
-#### AdGuard
+## Limitations
 
-[AdGuard Annoyances](https://github.com/AdguardTeam/AdguardFilters/tree/master/AnnoyancesFilter)
-([filters/14.txt](https://filters.adtidy.org/extension/ublock/filters/14.txt))  
-[AdGuard URL Tracking Protection](https://github.com/AdguardTeam/AdguardFilters/tree/master/TrackParamFilter)
-([filters/17.txt](https://filters.adtidy.org/extension/ublock/filters/17.txt))
+- **Time windows:** entries in `domains-time-restricted.txt` (the `@tag` syntax) work only in the `.txt` format. In `.json`, `.srs` and `.rpz` they are blocked all the time.
+- **Subdomains:** a domain entry also blocks its subdomains in dnscrypt-proxy. This is broader than the exact-match semantics of the upstream hosts files.
+- **Mini variant:** lists that exist only in ABP/uBO syntax are not converted to domains, because a domain block cannot express their path rules and would cause false positives. This covers Brave's own lists, URL-parameter lists, and the Bulgarian, Latvian, RoList, ABPVN, Serbo-Croatian and AdGuard Japanese/Dutch regional lists. Use `ubo-filterlist.txt` for those.
 
-#### Fanboy
+## Sources
 
-[EasyList Cookie List](https://fanboy.co.nz/) (uBO catalog name: "EasyList – Cookie Notices")
-& [Fanboy's Annoyance List](https://fanboy.co.nz/)
-([Cookie List](https://secure.fanboy.co.nz/fanboy-cookiemonster_ubo.txt),
-[Annoyance List](https://secure.fanboy.co.nz/fanboy-annoyance_ubo.txt)) —
-hosted by Fanboy, not EasyList, despite the "EasyList Cookie List" name.
+The config files are the source of truth. Edit them, not this README.
 
-#### Independent
+| Output | Config | Merged by |
+| --- | --- | --- |
+| big | [`domains-blocklist.conf`](domains-blocklist.conf) | [`generate-domains-blocklist.py`](https://github.com/DNSCrypt/dnscrypt-proxy/wiki/Combining-Blocklists) |
+| mini | [`domains-blocklist-mini.conf`](domains-blocklist-mini.conf) | same script |
+| uBO | [`ubo-sources.json`](ubo-sources.json) | [`@adguard/hostlist-compiler`](https://github.com/AdguardTeam/HostlistCompiler) |
 
-[➗ Actually Legitimate URL Shortener Tool](https://github.com/DandelionSprout/adfilt/discussions/163)
-([LegitimateURLShortener.txt](https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt))  
-[Online Malicious URL Blocklist (uBO format)](https://github.com/curbengh/urlhaus-filter)
-([urlhaus-filter-ag-online.txt](https://urlhaus-filter.pages.dev/urlhaus-filter-ag-online.txt)) —
-same project as the DNS-level source above, but matches at the full-URL/path level,
-enabled by default in Mullvad Browser's uBO.
+Local lists:
 
-#### GrapheneOS Vanadium
+- [`domains-blocklist.txt`](domains-blocklist.txt): extra blocked domains
+- [`domains-allowlist.txt`](domains-allowlist.txt): domains removed from the result
+- [`domains-time-restricted.txt`](domains-time-restricted.txt): time-window entries
 
-Baked into Chromium's subresource filter at build time (not a subscribable
-list), per [`.gclient`](https://github.com/GrapheneOS/Vanadium/blob/main/.gclient):
-[Arabic](https://easylist-downloads.adblockplus.org/liste_ar.txt),
-[Bulgarian](https://stanev.org/abp/adblock_bg.txt),
-[Spanish](https://easylist-downloads.adblockplus.org/easylistspanish.txt),
-[French](https://easylist-downloads.adblockplus.org/liste_fr.txt),
-[German](https://easylist.to/easylistgermany/easylistgermany.txt),
-[Hebrew](https://raw.githubusercontent.com/easylist/EasyListHebrew/master/EasyListHebrew.txt),
-[Indian](https://easylist-downloads.adblockplus.org/indianlist.txt),
-[Indonesian](https://raw.githubusercontent.com/heradhis/indonesianadblockrules/master/subscriptions/abpindo.txt),
-[Italian](https://easylist-downloads.adblockplus.org/easylistitaly.txt),
-[Korean](https://easylist-downloads.adblockplus.org/koreanlist.txt),
-[Lithuanian](https://raw.githubusercontent.com/EasyList-Lithuania/easylist_lithuania/master/easylistlithuania.txt),
-[Latvian](https://raw.githubusercontent.com/Latvian-List/adblock-latvian/master/lists/latvian-list.txt),
-[Dutch](https://easylist-downloads.adblockplus.org/easylistdutch.txt),
-[Norwegian/Nordic](<https://raw.githubusercontent.com/DandelionSprout/adfilt/master/NorwegianExperimentalList%20alternate%20versions/NordicFiltersABP-Inclusion.txt>),
-[Polish](https://easylist-downloads.adblockplus.org/easylistpolish.txt),
-[Portuguese](https://easylist-downloads.adblockplus.org/easylistportuguese.txt),
-[Romanian](https://zoso.ro/pages/rolist.txt),
-[Russian](https://easylist-downloads.adblockplus.org/ruadlist.txt),
-[Vietnamese](https://abpvn.com/filter/abpvn-IPl6HE.txt),
-[Chinese](https://easylist-downloads.adblockplus.org/easylistchina.txt) —
-all of the above are also used by Trivalent (below) except where it uses a
-different source for the same language.
+Main upstream projects:
 
-#### secureblue Trivalent
+- **big:** [anti-AD](https://github.com/privacy-protection-tools/anti-AD), [217heidai/adblockfilters](https://github.com/217heidai/adblockfilters), [HaGeZi](https://github.com/hagezi/dns-blocklists), [OISD](https://oisd.nl/), [Peter Lowe's](https://pgl.yoyo.org/adservers/), [Dan Pollock's](https://someonewhocares.org/hosts/), [URLhaus filter](https://github.com/curbengh/urlhaus-filter)
+- **mini:** URLhaus and [Phishing filter](https://github.com/curbengh/phishing-filter), Peter Lowe's, [smed79/easylist-hosts](https://github.com/smed79/easylist-hosts), 217heidai/adblockfilters (lite), and regional hosts exports (see the config)
+- **uBO:** uBlock filters, EasyList/EasyPrivacy, AdGuard Annoyances and URL Tracking Protection, Fanboy lists, and the regional lists that Vanadium and Trivalent ship
 
-Same setup as Vanadium, per
-[`copr_script.sh`](https://github.com/secureblue/trivalent-subresource-filter/blob/live/copr_script.sh).
-Shares Vanadium's list above, plus:
-[Fanboy Annoyance List, full version](https://secure.fanboy.co.nz/fanboy-annoyance.txt)
-(vs. the trimmed uBO version already listed under Fanboy above),
-[Czech & Slovak](https://raw.githubusercontent.com/tomasko126/easylistczechandslovak/master/filters.txt),
-[Dutch (AdGuard)](https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_8_Dutch/filter.txt)
-(Trivalent uses this instead of Vanadium's EasyList Dutch above),
-[Serbo-Croatian](https://raw.githubusercontent.com/DandelionSprout/adfilt/refs/heads/master/SerboCroatianList.txt),
-[Swedish](https://raw.githubusercontent.com/lassekongo83/Frellwits-filter-lists/master/Frellwits-Swedish-Filter.txt),
-[Japanese (AdGuard)](https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_7_Japanese/filter.txt).
+## See also
 
-### Extended Reading:
+- [Privacy Guides: browser extensions](https://www.privacyguides.org/en/browser-extensions/)
+- [arkenfox wiki: extensions](https://github.com/arkenfox/user.js/wiki/4.1-Extensions): why you may not need many extensions
 
-[PrivacyGuide](https://www.privacyguides.org/en/browser-extensions/) recommends to use `AdGuard URL Tracking Protection` and [Actually Legitimate URL Shortener Tool](https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt) and [uBLockOrigin wiki](https://github.com/gorhill/uBlock/wiki/Reference-description-of-uBO-in-various-extensions-stores) mentioned they contained various list.
-
-### And..
-
-Read the [arkenfox wiki](https://github.com/arkenfox/user.js/wiki/4.1-Extensions) to get to know why you don't need so many extensions.
+<!-- Download link references -->
+[r-big-txt]: https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist.txt
+[r-big-json]: https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist.json
+[r-big-srs]: https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist.srs
+[r-big-rpz]: https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist.rpz
+[r-mini-txt]: https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist-mini.txt
+[r-mini-json]: https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist-mini.json
+[r-mini-srs]: https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist-mini.srs
+[r-mini-rpz]: https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/blocklist-mini.rpz
+[r-ubo]: https://github.com/hydroakri/dnscrypt-proxy-blocklist/releases/latest/download/ubo-filterlist.txt
+[c-big-txt]: https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.txt
+[c-big-json]: https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.json
+[c-big-srs]: https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.srs
+[c-big-rpz]: https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist.rpz
+[c-mini-txt]: https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist-mini.txt
+[c-mini-json]: https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist-mini.json
+[c-mini-srs]: https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist-mini.srs
+[c-mini-rpz]: https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/blocklist-mini.rpz
+[c-ubo]: https://cdn.jsdelivr.net/gh/hydroakri/dnscrypt-proxy-blocklist@release/ubo-filterlist.txt
+[w-big-txt]: https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist.txt
+[w-big-json]: https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist.json
+[w-big-srs]: https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist.srs
+[w-big-rpz]: https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist.rpz
+[w-mini-txt]: https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist-mini.txt
+[w-mini-json]: https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist-mini.json
+[w-mini-srs]: https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist-mini.srs
+[w-mini-rpz]: https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/blocklist-mini.rpz
+[w-ubo]: https://raw.githubusercontent.com/hydroakri/dnscrypt-proxy-blocklist/release/ubo-filterlist.txt
