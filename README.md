@@ -24,7 +24,7 @@ Updates are published only when the generated content changes (`state.json` stor
 
 | Variant | Files | Content | Pick it when |
 | --- | --- | --- | --- |
-| **big** | `blocklist.*` | Everything in mini, plus HaGeZi, OISD, anti-AD, Dan Pollock's and other large lists | You want maximum coverage. |
+| **big** | `blocklist.*` | Everything in mini, plus 217heidai (full), HaGeZi and other large lists | You want maximum coverage. |
 | **mini** | `blocklist-mini.*` | Default filter lists of privacy browsers (Mullvad, LibreWolf, Brave, Vanadium, Trivalent) and their regional language lists, where a DNS-level export exists. Also includes a few extra lists browsers don't enable by default | You want a smaller list with fewer false positives. |
 | **uBO** | `ubo-filterlist.txt` | URL/path rules, not a domain list | You need cosmetic, cookie-notice, or URL-parameter filtering. Add it as a custom uBO subscription. |
 
@@ -79,7 +79,7 @@ Local lists:
 
 Main upstream projects:
 
-- **big:** [anti-AD](https://github.com/privacy-protection-tools/anti-AD), [217heidai/adblockfilters](https://github.com/217heidai/adblockfilters), [HaGeZi](https://github.com/hagezi/dns-blocklists), [OISD](https://oisd.nl/), [Peter Lowe's](https://pgl.yoyo.org/adservers/), [Dan Pollock's](https://someonewhocares.org/hosts/), [URLhaus filter](https://github.com/curbengh/urlhaus-filter), plus every source of mini
+- **big:** [217heidai/adblockfilters](https://github.com/217heidai/adblockfilters), [HaGeZi](https://github.com/hagezi/dns-blocklists), [Peter Lowe's](https://pgl.yoyo.org/adservers/), [URLhaus filter](https://github.com/curbengh/urlhaus-filter), plus every source of mini
 - **mini:** URLhaus, Peter Lowe's, [smed79/easylist-hosts](https://github.com/smed79/easylist-hosts), 217heidai/adblockfilters (lite), and regional hosts exports (see the config)
 - **uBO:** uBlock filters, EasyList/EasyPrivacy, AdGuard Annoyances and URL Tracking Protection, Fanboy lists, Peter Lowe's, URLhaus, and the regional lists that Vanadium and Trivalent ship
 

@@ -93,6 +93,16 @@ uBO's catalog ([`assets.json`@527a05c](https://github.com/gorhill/uBlock/blob/52
 | AdGuard – Cookie Notices, Popup Overlays, Mobile App Banners, Other Annoyances, Widgets | AdGuard Annoyances (`14.txt`), the combined list | identical, 59860 rules |
 | AdGuard/uBO – URL Tracking Protection | uBO's own `privacy-removeparam.txt`, not AdGuard's file. We subscribe to both it and AdGuard's `17.txt`, so the result is their union | 96% overlap |
 
+## Sources that are not browser defaults
+
+| Source | In | Why |
+| --- | --- | --- |
+| [217heidai/adblockfilters](https://github.com/217heidai/adblockfilters) (full / lite) | big / mini | Chinese-domain supplement; lite is domestic-only. Third-party aggregate of 16 upstreams, no independent benchmark. |
+| [HaGeZi Pro](https://github.com/hagezi/dns-blocklists) | big | Broad tier that includes the Native Tracker lists (covers 97-99% of the Xiaomi, Huawei, OPPO/Realme and vivo lists, measured 2026-11-17). |
+| HaGeZi TIF (mini) | big | Live malware and phishing feeds, alongside URLhaus. |
+
+None is mentioned by the uBO wiki, arkenfox or Privacy Guides (checked 2026-11-17).
+
 ## Overlap and deduplication
 
 Sources overlap on purpose, so each browser's defaults stay traceable. Checked on the released files, 2026-11-09.
